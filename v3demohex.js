@@ -1,6 +1,7 @@
 let buttonAFlag = false
 let buttonBFlag = false
 let buttonABFlag = false
+let shakeFlag = false
 
 input.onButtonPressed(Button.A, function () {
     buttonAFlag = true
@@ -13,10 +14,10 @@ input.onButtonPressed(Button.B, function () {
 input.onButtonPressed(Button.AB, function () {
     buttonABFlag = true
 })
+input.onGesture(Gesture.ThreeG, function () {
+    shakeFlag = true
+})
 
-function playSound(freq: number, duration: number) {
-
-}
 // ============= WELCOME DEMO =============
 function welcomeDemo() {
     startSound()
@@ -56,6 +57,7 @@ function menuLoop() {
     buttonAFlag = false
     buttonBFlag = false
     buttonABFlag = false
+    shakeFlag = false
 
     // Initial display
     LEDcounter(menuState)
@@ -90,15 +92,13 @@ function menuLoop() {
             continue
         }
 
-        // --- Shake → select program ---
-        let shakeStrength =
-            Math.abs(input.acceleration(Dimension.X)) +
-            Math.abs(input.acceleration(Dimension.Y)) +
-            Math.abs(input.acceleration(Dimension.Z))
+        if (shakeFlag) {
+            shakeFlag = false   // consume event
 
-        if (shakeStrength > 2500 || input.isGesture(Gesture.Shake)) {
             basic.pause(100)  // let shake settle
+
             menuAnimateEnter()
+
             if (menuState == 1) {
                 oracleRun()
             } else if (menuState == 2) {
@@ -108,12 +108,16 @@ function menuLoop() {
             } else if (menuState == 4) {
                 volumeMeterRun()
             }
+
             menuAnimateLeave()
-            // Restore menu display
+
             LEDcounter(menuState)
+            
             basic.showNumber(menuState)
+
             continue
         }
+
         basic.pause(1)
     }
 }
@@ -139,11 +143,26 @@ function showStringUntilButton(text: string, event_id: number) {
     // Wait until the correct button press happens
     while (true) {
 
-        // Check for the correct event
-        if (event_id == 1 && buttonAFlag && !buttonBFlag) break
-        if (event_id == 2 && buttonBFlag && !buttonAFlag) break
-        if (event_id == 3 && buttonABFlag) break
 
+        // Check for the correct event
+        if (event_id == 1 && buttonAFlag) {
+            buttonAFlag = false
+            buttonBFlag = false
+            buttonABFlag = false
+            break
+        }
+        if (event_id == 2 && buttonBFlag) {
+            buttonAFlag = false
+            buttonBFlag = false
+            buttonABFlag = false
+            break
+        }
+        if (event_id == 3 && buttonABFlag) {
+            buttonAFlag = false
+            buttonBFlag = false
+            buttonABFlag = false
+            break
+        }
         // Animate arrow
         arrow.showImage(0)
         basic.pause(200)
@@ -349,7 +368,8 @@ function multiplicationRun() {
             basic.pause(300)
         }
         // --- Shake → show result ---
-        if (input.isGesture(Gesture.Shake) && ready) {
+        if (shakeFlag && ready) {
+            shakeFlag = false   // consume event
             result = factor1 * factor2
             basic.showNumber(result)
             basic.pause(1000)
@@ -370,18 +390,13 @@ function volumeMeterRun() {
         0,
         0
     ]
+    buttonABFlag = false  // start fresh
     while (!(leave)) {
-        //
-        // --- WAIT UP TO 2 SECONDS OR UNTIL AB IS PRESSED ---
-        //
-        buttonABFlag = false  // start fresh
-        for (let t = 0; t < 2000; t += 100) {
-            basic.pause(100)
-            if (buttonABFlag) {
-                buttonABFlag = false
-                leave = true
-                break
-            }
+
+        if (buttonABFlag) {
+            buttonABFlag = false
+            leave = true
+            break
         }
 
         for (let n = 0; n <= 3; n++) {
@@ -452,7 +467,7 @@ function rainbow() {
     // Faden
     for (let l = 0; l <= 30; l++) {
         brightness = Math.max(0, 8 - l * 0.26)
-        basic.setLedColors(hslToHex(299 % 360, 100, 50-l), hslToHex((299 + 30) % 360, 100, 50-l), hslToHex((299 + 60) % 360, 100, 50-l))
+        basic.setLedColors(hslToHex(299 % 360, 100, 50 - l), hslToHex((299 + 30) % 360, 100, 50 - l), hslToHex((299 + 60) % 360, 100, 50 - l))
         led.setBrightness(Math.max(0, 300 - l * 10))
         basic.pause(10)
     }
@@ -471,7 +486,6 @@ function LEDTrafficLight(color: number) {
         // Red
         basic.setLedColors(0x000000, 0x000000, 0xff0000)
     }
-    strip.show()
 }
 function LEDcounter(number: number) {
     // Light up RGB LEDs based on menu number
@@ -493,75 +507,99 @@ function LEDcounter(number: number) {
 
 
 function moveImageUntilShake(image: Image) {
+
+    // Start fresh
+    shakeFlag = false
+    buttonABFlag = false
+
     localX = -3
     localDirection = 1
-    while (!(localShakeDetected) && !(leave)) {
-        // Update position calculation
+
+    while (!shakeFlag && !leave) {
+
+        //
+        // --- Move image ---
+        //
         localX += localDirection
         if (localX >= 4) {
             localDirection = -1
         } else if (localX <= -3) {
             localDirection = 1
         }
-        // Show the image at the new position
-        image.showImage(localX)
-        // Now check for input multiple times during the pause
-        // This makes shake detection much more responsive
-        buttonABFlag = false   // start fresh
-        for (let index = 0; index < 3; index++) {
-            basic.pause(1)
-            if (buttonABFlag) {
-                buttonABFlag = false   // consume event
-                leave = true
-                localShakeDetected = true
-                break
-            }
 
+        drawImageFast(image, localX)
+        basic.pause(70)
 
-            // Check for shake using accelerometer
-            // Lower threshold (1500mg instead of 2000mg) for better sensitivity
-            accelX = Math.abs(input.acceleration(Dimension.X))
-            accelY = Math.abs(input.acceleration(Dimension.Y))
-            accelZ = Math.abs(input.acceleration(Dimension.Z))
-            // Check if any axis shows strong movement
-            if (accelX > 1500 || accelY > 1500 || accelZ > 1500) {
-                localShakeDetected = true
-                break;
-            }
+        //
+        // --- Check for AB exit (latched) ---
+        //
+        if (buttonABFlag) {
+            buttonABFlag = false     // consume event
+            leave = true
+            shakeFlag = false        // consume shake if any
+            break
         }
+
+        //
+        // --- Check for shake (latched) ---
+        //
+        if (shakeFlag) {
+            break
+        }
+
+        //
+        // Small pause to control animation speed
+        //
+        basic.pause(10)
+
         frameCount += 1
     }
-    // Wait for movement to stop before continuing
+
+    // Let movement settle
     basic.pause(100)
 }
-function beep() {
 
+function drawImageFast(img: Image, offsetX: number) {
+    basic.clearScreen()
+
+    for (let y = 0; y < 5; y++) {
+        for (let x = 0; x < 5; x++) {
+
+            // Convert pixel to boolean on the fly
+            if (img.pixel(x, y)) {
+                let px = x + offsetX
+                if (px >= 0 && px < 5) {
+                    led.plot(px, y)
+                }
+            }
+        }
+    }
 }
+
 function menuAnimateLeave() {
-    IMAGE_RECT_L.showImage(0)
-    basic.pause(5)
-    IMAGE_RECT_S.showImage(0)
-    basic.pause(5)
-    IMAGE_DOT.showImage(0)
-    basic.pause(5)
+    drawImageFast(IMAGE_RECT_L, 0)
+    basic.pause(150)
+    drawImageFast(IMAGE_RECT_S, 0)
+    basic.pause(150)
+    drawImageFast(IMAGE_DOT, 0)
+    basic.pause(150)
     basic.clearScreen()
     disableLEDs()
 }
 function menuAnimateEnter() {
     disableLEDs()
-    IMAGE_DOT.showImage(0)
-    basic.pause(5)
-    IMAGE_RECT_S.showImage(0)
-    basic.pause(5)
-    IMAGE_RECT_L.showImage(0)
-    basic.pause(5)
+    drawImageFast(IMAGE_DOT, 0)
+    basic.pause(150)
+    drawImageFast(IMAGE_RECT_S, 0)
+    basic.pause(150)
+    drawImageFast(IMAGE_RECT_L, 0)
+    basic.pause(150)
     basic.clearScreen()
 }
 let frameCount = 0
 let accelZ = 0
 let accelY = 0
 let accelX = 0
-let localShakeDetected = false
 let localDirection = 0
 let localX = 0
 let result = 0
@@ -575,8 +613,6 @@ let gauge = 0
 let soundLevel = 0
 let gauges: number[] = []
 let localArrowImage: Image = null
-let localShakeStrength = 0
-let strip: neopixel.Strip = null
 let displayBrightness = 0
 let menuState = 0
 let IMAGE_MULTIPLY: Image = null
@@ -602,11 +638,7 @@ let pressed = false
 let leave = false
 let x = 0
 let direction = 0
-let shakeDetected = false
 let accelStrength = 0
-let localDetected = false
-let shakeStrength = 0
-let btnDetected = false
 IMAGE_SMILEY = images.createImage(`
     . # . # .
     . # . # .
@@ -716,8 +748,7 @@ IMAGE_MULTIPLY = images.createImage(`
 menuState = 1
 let firstTime = true
 displayBrightness = 255
-strip = neopixel.create(DigitalPin.RGB, 3, NeoPixelMode.RGB)
-strip.setBrightness(50)
+
 led.setBrightness(displayBrightness)
 disableLEDs()
 if (firstTime) {

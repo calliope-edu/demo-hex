@@ -361,14 +361,14 @@ function rainbow() {
     led.setBrightness(0)
     IMAGE_SMILEY.showImage(0)
     for (let j = 0; j <= 299; j++) {
-        basic.setLedColors(hslToHex(j % 360, 100, 50), hslToHex((j + 30) % 360, 100, 50), hslToHex((j + 60) % 360, 100, 50))
+        basic.setLedColors(hslToHex(j % 360, 100, 30), hslToHex((j + 30) % 360, 100, 30), hslToHex((j + 60) % 360, 100, 30))
         led.setBrightness(Math.min(255, j))
         basic.pause(10)
     }
     // Faden
     for (let l = 0; l <= 30; l++) {
         brightness = Math.max(0, 8 - l * 0.26)
-        basic.setLedColors(hslToHex(299 % 360, 100, 50 - l), hslToHex((299 + 30) % 360, 100, 50 - l), hslToHex((299 + 60) % 360, 100, 50 - l))
+        basic.setLedColors(hslToHex(299 % 360, 100, 30 - l), hslToHex((299 + 30) % 360, 100, 30 - l), hslToHex((299 + 60) % 360, 100, 30 - l))
         led.setBrightness(Math.max(0, 300 - l * 10))
         basic.pause(10)
     }

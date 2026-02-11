@@ -1,3 +1,5 @@
+// ============= Variables =============
+
 let px = 0
 let localDirection = 0
 let localX = 0
@@ -11,29 +13,31 @@ let sum = 0
 let gauge = 0
 let soundLevel = 0
 let gauges: number[] = []
-let arrow: Image = null
 let shakeFlag = false
 let buttonBFlag = false
 let buttonAFlag = false
-let buttonABFlag = false
-
 let m = 0
 let x = 0
 let c = 0
 let l = 0
 let s = 0
 let h = 0
-let menuState = 1
+let hardwareVersion = 0
+let DIGIT_IMAGES: Image[] = []
 let IMAGE_MULTIPLY: Image = null
 let IMAGE_ROCK: Image = null
 let IMAGE_DOUBLE_ROW: Image = null
 let IMAGE_RECT_L: Image = null
 let IMAGE_RECT_S: Image = null
-let IMAGE_ARROW_LEFT_RIGHT: Image = null
 let IMAGE_SAD: Image = null
 let IMAGE_SMILEY: Image = null
+let menuState = 0
+let arrow = null
+let buttonABFlag = false
+let IMAGE_ARROW_LEFT_RIGHT = null
 let leave = false
 let frameCount = 0
+menuState = 1
 IMAGE_SMILEY = images.createImage(`
     . # . # .
     . # . # .
@@ -48,7 +52,6 @@ IMAGE_SAD = images.createImage(`
     . # # # .
     # . . . #
     `)
-
 IMAGE_RECT_S = images.createImage(`
     . . . . .
     . # # # .
@@ -63,7 +66,6 @@ IMAGE_RECT_L = images.createImage(`
     # . . . #
     # # # # #
     `)
-
 IMAGE_DOUBLE_ROW = images.createImage(`
     . # # . .
     . # # . .
@@ -78,8 +80,6 @@ IMAGE_ROCK = images.createImage(`
     . # # # .
     . . . . .
     `)
-
-
 IMAGE_MULTIPLY = images.createImage(`
     . . . . .
     . # . # .
@@ -87,40 +87,39 @@ IMAGE_MULTIPLY = images.createImage(`
     . # . # .
     . . . . .
     `)
-
-const DIGIT_IMAGES: Image[] = [
+DIGIT_IMAGES = [
     images.createImage(`
-        . . # . .
-        . # # . .
-        . . # . .
-        . . # . .
-        . # # # .
-    `), // 1
+    . . # . .
+    . # # . .
+    . . # . .
+    . . # . .
+    . # # # .
+    `),
     images.createImage(`
-        . # # # .
-        . . . . #
-        . . # # .
-        . # . . .
-        . # # # #
-    `), // 2
+    . # # # .
+    . . . . #
+    . . # # .
+    . # . . .
+    . # # # #
+    `),
     images.createImage(`
-         . # # # .
-         . . . . #
-         . . # # .
-         . . . . #
-         . # # # .
-    `), // 3
+    . # # # .
+    . . . . #
+    . . # # .
+    . . . . #
+    . # # # .
+    `),
     images.createImage(`
-        . . # # .
-        . # . # .
-        # . . # .
-        # # # # #
-        . . . # .
-    `)  // 4
+    . . # # .
+    . # . # .
+    # . . # .
+    # # # # #
+    . . . # .
+    `)
 ]
 
 // ============= WELCOME DEMO =============
-function welcomeDemo() {
+function welcomeDemo () {
     basic.showString("Hi!", 100)
     // Press A
     showStringUntilButton("A", 1)
@@ -139,16 +138,15 @@ function welcomeDemo() {
     basic.clearScreen()
     moveImageUntilShake(IMAGE_DOUBLE_ROW)
     basic.showIcon(IconNames.Yes)
-    music.setVolume(255)
     basic.pause(200)
     basic.clearScreen()
     basic.showString("OK!", 100)
-    music.play(music.builtinPlayableSoundEffect(soundExpression.giggle), music.PlaybackMode.InBackground)
+
     // Rainbow animation
     rainbow()
     basic.pause(1000)
 }
-function hslToHex(h: number, s: number, l: number) {
+function hslToHex (h: number, s: number, l: number) {
     h = h % 360
     s = s / 100
     l = l / 100
@@ -156,7 +154,7 @@ function hslToHex(h: number, s: number, l: number) {
     x = c * (1 - Math.abs(h / 60 % 2 - 1))
     m = l - c / 2
     let r, g, b;
-    if (h < 60) {
+if (h < 60) {
         r = c
         g = x
         b = 0
@@ -187,7 +185,7 @@ function hslToHex(h: number, s: number, l: number) {
     return (r << 16) | (g << 8) | b
 }
 // ============= MENU SYSTEM =============
-function menuLoop() {
+function menuLoop () {
     // Reset flags so only NEW presses count
     buttonAFlag = false
     buttonBFlag = false
@@ -242,23 +240,12 @@ function menuLoop() {
 input.onButtonPressed(Button.A, function () {
     buttonAFlag = true
 })
-input.onButtonPressed(Button.AB, function () {
-    buttonABFlag = true
-})
-input.onButtonPressed(Button.B, function () {
-    buttonBFlag = true
-})
-input.onGesture(Gesture.ThreeG, function () {
-    shakeFlag = true
-})
-
-function showStringUntilButton(text: string, event_id: number) {
+function showStringUntilButton (text: string, event_id: number) {
     // Reset button flags so only NEW presses count
     buttonAFlag = false
     buttonBFlag = false
     buttonABFlag = false
     // Pick arrow image
-
     // Show the text (blocking is fine now)
     basic.showString(text, 100)
     // Wait until the correct button press happens
@@ -285,13 +272,13 @@ function showStringUntilButton(text: string, event_id: number) {
         // Animate arrow
         if (event_id == 1) {
             basic.showIcon(IconNames.ArrowWest)
-        } if (event_id == 2) {
+        }
+        if (event_id == 2) {
             basic.showIcon(IconNames.ArrowEast)
         }
         if (event_id == 3) {
             basic.showIcon(IconNames.Diamond)
         }
-
         basic.clearScreen()
         basic.pause(200)
     }
@@ -305,14 +292,14 @@ function showStringUntilButton(text: string, event_id: number) {
     buttonABFlag = false
 }
 // ============= PROGRAM 4: VOLUME METER =============
-function volumeMeterRun() {
+function volumeMeterRun () {
     leave = false
     gauges = [
-        0,
-        0,
-        0,
-        0,
-        0
+    0,
+    0,
+    0,
+    0,
+    0
     ]
     // start fresh
     buttonABFlag = false
@@ -356,20 +343,29 @@ function volumeMeterRun() {
     basic.clearScreen()
     basic.turnRgbLedOff()
 }
-function rainbow() {
+function rainbow () {
     let brightness;
-    led.setBrightness(0)
+led.setBrightness(0)
     IMAGE_SMILEY.showImage(0)
     for (let j = 0; j <= 299; j++) {
-        basic.setLedColors(hslToHex(j % 360, 100, 30), hslToHex((j + 30) % 360, 100, 30), hslToHex((j + 60) % 360, 100, 30))
+        if (hardwareVersion == 3) {
+            basic.setLedColors(hslToHex(j % 360, 100, 30), hslToHex((j + 30) % 360, 100, 30), hslToHex((j + 60) % 360, 100, 30))
+        } else {
+            basic.setLedColor(hslToHex(j % 360, 100, 10))
+        }
         led.setBrightness(Math.min(255, j))
         basic.pause(10)
     }
+    music.playTone(262, 125)
+    basic.pause(63)
+    music.playTone(784, 500)
     // Faden
-    for (let l = 0; l <= 30; l++) {
-        brightness = Math.max(0, 8 - l * 0.26)
-        basic.setLedColors(hslToHex(299 % 360, 100, 30 - l), hslToHex((299 + 30) % 360, 100, 30 - l), hslToHex((299 + 60) % 360, 100, 30 - l))
-        led.setBrightness(Math.max(0, 300 - l * 10))
+    for (let p = 0; p <= 30; p++) {
+        brightness = Math.max(0, 8 - p * 0.26)
+        if (hardwareVersion == 3) {
+            basic.setLedColors(hslToHex(299 % 360, 100, 30 - p), hslToHex((299 + 30) % 360, 100, 30 - p), hslToHex((299 + 60) % 360, 100, 30 - p))
+        }
+        led.setBrightness(Math.max(0, 300 - p * 10))
         basic.pause(10)
     }
     basic.clearScreen()
@@ -377,7 +373,7 @@ function rainbow() {
     basic.turnRgbLedOff()
 }
 // ============= PROGRAM 2: ROCK PAPER SCISSORS =============
-function rockPaperScissorsRun() {
+function rockPaperScissorsRun () {
     leave = false
     // Show what's possible
     IMAGE_ROCK.showImage(0)
@@ -415,40 +411,56 @@ function rockPaperScissorsRun() {
                 break
             }
         }
-        basic.clearScreen()
+basic.clearScreen()
     }
 }
-function LEDTrafficLight(color: number) {
+function LEDTrafficLight (color: number) {
     if (color == 0) {
         // Green
-        basic.setLedColors(0x009000, 0x000000, 0x000000)
+        if (hardwareVersion == 3) {
+            basic.setLedColors(0x009000, 0x000000, 0x000000)
+        } else {
+            basic.setLedColor(0x009000)
+        }
     } else if (color == 1) {
         // Yellow
-        basic.setLedColors(0x000000, 0x909000, 0x000000)
+        if (hardwareVersion == 3) {
+            basic.setLedColors(0x000000, 0x909000, 0x000000)
+        } else {
+            basic.setLedColor(0x909000)
+        }
     } else if (color == 2) {
         // Red
-        basic.setLedColors(0x000000, 0x000000, 0x900000)
+        if (hardwareVersion == 3) {
+            basic.setLedColors(0x000000, 0x000000, 0x900000)
+        } else {
+            basic.setLedColor(0x900000)
+        }
     }
 }
-function LEDcounter(number: number) {
-    // Light up RGB LEDs based on menu number
+function LEDcounter (number: number) {
+    // V3: Light up RGB LEDs based on menu number
     // Menu 1: Left LED only
     // Menu 2: Left + Middle LEDs
     // Menu 3: Middle + Right LEDs
     // Menu 4: Right LED only
-    if (number == 1) {
-        basic.setLedColors(0x505050, 0x000000, 0x000000)
-    } else if (number == 2) {
-        basic.setLedColors(0x505050, 0x505050, 0x000000)
-    } else if (number == 3) {
-        basic.setLedColors(0x000000, 0x505050, 0x505050)
-    } else if (number == 4) {
-        basic.setLedColors(0x000000, 0x000000, 0x505050)
+    if (hardwareVersion == 3) {
+        if (number == 1) {
+            basic.setLedColors(0x505050, 0x000000, 0x000000)
+        } else if (number == 2) {
+            basic.setLedColors(0x505050, 0x505050, 0x000000)
+        } else if (number == 3) {
+            basic.setLedColors(0x000000, 0x505050, 0x505050)
+        } else if (number == 4) {
+            basic.setLedColors(0x000000, 0x000000, 0x505050)
+        }
     }
 }
-
+input.onButtonPressed(Button.AB, function () {
+    buttonABFlag = true
+})
 // ============= PROGRAM 3: MULTIPLICATION =============
-function multiplicationRun() {
+function multiplicationRun () {
     leave = false
     ready = false
     // Reset button flags so only NEW presses count
@@ -456,7 +468,6 @@ function multiplicationRun() {
     buttonBFlag = false
     buttonABFlag = false
     basic.showIcon(IconNames.ArrowWest)
-
     while (!(leave)) {
         // --- AB pressed → leave ---
         if (buttonABFlag) {
@@ -501,9 +512,14 @@ function multiplicationRun() {
         basic.pause(50)
     }
 }
-
+input.onButtonPressed(Button.B, function () {
+    buttonBFlag = true
+})
+input.onGesture(Gesture.ThreeG, function () {
+    shakeFlag = true
+})
 // ============= PROGRAM 1: ORACLE =============
-function oracleRun() {
+function oracleRun () {
     leave = false
     pressed = false
     // Reset flags so only NEW presses count
@@ -528,7 +544,6 @@ function oracleRun() {
             }
             // Arrow animation
             basic.showIcon(IconNames.ArrowWest)
-
             basic.pause(400)
             basic.clearScreen()
             basic.pause(400)
@@ -548,7 +563,6 @@ function oracleRun() {
                 break;
             }
             led.plot(2, 2)
-
             basic.pause(100)
             basic.clearScreen()
             basic.pause(100)
@@ -558,7 +572,6 @@ function oracleRun() {
         }
         // --- SHOW RESULT ---
         if (Math.random() < 0.5) {
-
             IMAGE_SMILEY.showImage(0)
         } else {
             IMAGE_SAD.showImage(0)
@@ -575,10 +588,10 @@ function oracleRun() {
                 break
             }
         }
-        basic.clearScreen()
+basic.clearScreen()
     }
 }
-function moveImageUntilShake(image: Image) {
+function moveImageUntilShake (image: Image) {
     // Start fresh
     shakeFlag = false
     buttonABFlag = false
@@ -613,7 +626,7 @@ function moveImageUntilShake(image: Image) {
     // Let movement settle
     basic.pause(100)
 }
-function drawImageFast(img: Image, offsetX: number) {
+function drawImageFast (img: Image, offsetX: number) {
     basic.clearScreen()
     for (let y2 = 0; y2 <= 4; y2++) {
         for (let x3 = 0; x3 <= 4; x3++) {
@@ -627,7 +640,7 @@ function drawImageFast(img: Image, offsetX: number) {
         }
     }
 }
-function menuAnimateLeave() {
+function menuAnimateLeave () {
     drawImageFast(IMAGE_RECT_L, 0)
     basic.pause(150)
     drawImageFast(IMAGE_RECT_S, 0)
@@ -637,7 +650,7 @@ function menuAnimateLeave() {
     basic.clearScreen()
     basic.turnRgbLedOff()
 }
-function menuAnimateEnter() {
+function menuAnimateEnter () {
     basic.turnRgbLedOff()
     led.plot(2, 2)
     basic.pause(150)
@@ -647,9 +660,14 @@ function menuAnimateEnter() {
     basic.pause(150)
     basic.clearScreen()
 }
-
-
 
 // ============= PROGRAM START =============
+
+if (control.ramSize() > 64000) {
+    hardwareVersion = 3
+} else {
+    hardwareVersion = 2
+}
+
 welcomeDemo()
 menuLoop()

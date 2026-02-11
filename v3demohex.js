@@ -651,5 +651,5 @@ function menuAnimateEnter() {
 
 
 // ============= PROGRAM START =============
-menuLoop()
 welcomeDemo()
+menuLoop()

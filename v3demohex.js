@@ -14,11 +14,11 @@ input.onButtonPressed(Button.AB, function () {
     buttonABFlag = true
 })
 
-function playSound (freq: number, duration: number) {
-	
+function playSound(freq: number, duration: number) {
+
 }
 // ============= WELCOME DEMO =============
-function welcomeDemo () {
+function welcomeDemo() {
     startSound()
     basic.showString("Hi!", 100)
     // Press A
@@ -118,7 +118,7 @@ function menuLoop() {
     }
 }
 
-function disableLEDs () {
+function disableLEDs() {
     basic.turnRgbLedOff()
 }
 function showStringUntilButton(text: string, event_id: number) {
@@ -162,12 +162,12 @@ function showStringUntilButton(text: string, event_id: number) {
     buttonABFlag = false
 }
 
-function startSound () {
-	
+function startSound() {
+
 }
 
 // ============= PROGRAM 1: ORACLE =============
-function oracleRun () {
+function oracleRun() {
 
     leave = false
     pressed = false
@@ -260,7 +260,7 @@ function oracleRun () {
     }
 }
 // ============= PROGRAM 2: ROCK PAPER SCISSORS =============
-function rockPaperScissorsRun () {
+function rockPaperScissorsRun() {
     leave = false
     // Show what's possible
     IMAGE_ROCK.showImage(0)
@@ -286,7 +286,7 @@ function rockPaperScissorsRun () {
         } else {
             IMAGE_SCISSORS.showImage(0)
         }
-        
+
         //
         // --- WAIT UP TO 2 SECONDS OR UNTIL AB IS PRESSED ---
         //
@@ -305,15 +305,15 @@ function rockPaperScissorsRun () {
 
 // ============= PROGRAM 3: MULTIPLICATION =============
 function multiplicationRun() {
-    
+
     leave = false
     ready = false
-    
+
     // Reset button flags so only NEW presses count
     buttonAFlag = false
     buttonBFlag = false
     buttonABFlag = false
-    
+
     IMAGE_ARROW_LEFT.showImage(0)
     while (!leave) {
         // --- AB pressed → leave ---
@@ -361,14 +361,14 @@ function multiplicationRun() {
     }
 }
 // ============= PROGRAM 4: VOLUME METER =============
-function volumeMeterRun () {
+function volumeMeterRun() {
     leave = false
     gauges = [
-    0,
-    0,
-    0,
-    0,
-    0
+        0,
+        0,
+        0,
+        0,
+        0
     ]
     while (!(leave)) {
         //
@@ -418,25 +418,41 @@ function volumeMeterRun () {
     basic.clearScreen()
     disableLEDs()
 }
+function hslToHex(h: number, s: number, l: number) {
+    h = h % 360;
+    s = s / 100;
+    l = l / 100;
 
-function rainbow () {
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = l - c / 2;
+    let r, g, b;
+
+    if (h < 60) { r = c; g = x; b = 0; }
+    else if (h < 120) { r = x; g = c; b = 0; }
+    else if (h < 180) { r = 0; g = c; b = x; }
+    else if (h < 240) { r = 0; g = x; b = c; }
+    else if (h < 300) { r = x; g = 0; b = c; }
+    else { r = c; g = 0; b = x; }
+
+    r = Math.round((r + m) * 255);
+    g = Math.round((g + m) * 255);
+    b = Math.round((b + m) * 255);
+
+    return (r << 16) | (g << 8) | b;
+}
+function rainbow() {
     led.setBrightness(0)
     IMAGE_SMILEY.showImage(0)
     for (let j = 0; j <= 299; j++) {
-        for (let k = 0; k <= 2; k++) {
-            strip.setPixelColor(k, neopixel.hsl((j + k * 30) % 360, 100, 8))
-        }
-        strip.show()
+        basic.setLedColors(hslToHex(j % 360, 100, 50), hslToHex((j + 30) % 360, 100, 50), hslToHex((j + 60) % 360, 100, 50))
         led.setBrightness(Math.min(255, j))
         basic.pause(10)
     }
     // Faden
     for (let l = 0; l <= 30; l++) {
         brightness = Math.max(0, 8 - l * 0.26)
-        for (let q = 0; q <= 2; q++) {
-            strip.setPixelColor(q, neopixel.hsl((300 + q * 30) % 360, 100, brightness))
-        }
-        strip.show()
+        basic.setLedColors(hslToHex(299 % 360, 100, 50-l), hslToHex((299 + 30) % 360, 100, 50-l), hslToHex((299 + 60) % 360, 100, 50-l))
         led.setBrightness(Math.max(0, 300 - l * 10))
         basic.pause(10)
     }
@@ -444,7 +460,7 @@ function rainbow () {
     led.setBrightness(displayBrightness)
     disableLEDs()
 }
-function LEDTrafficLight (color: number) {
+function LEDTrafficLight(color: number) {
     if (color == 0) {
         // Green
         basic.setLedColors(0x00ff00, 0x000000, 0x000000)
@@ -457,7 +473,7 @@ function LEDTrafficLight (color: number) {
     }
     strip.show()
 }
-function LEDcounter (number: number) {
+function LEDcounter(number: number) {
     // Light up RGB LEDs based on menu number
     // Menu 1: Left LED only
     // Menu 2: Left + Middle LEDs
@@ -476,7 +492,7 @@ function LEDcounter (number: number) {
 
 
 
-function moveImageUntilShake (image: Image) {
+function moveImageUntilShake(image: Image) {
     localX = -3
     localDirection = 1
     while (!(localShakeDetected) && !(leave)) {
@@ -500,7 +516,7 @@ function moveImageUntilShake (image: Image) {
                 localShakeDetected = true
                 break
             }
-    
+
 
             // Check for shake using accelerometer
             // Lower threshold (1500mg instead of 2000mg) for better sensitivity
@@ -518,10 +534,10 @@ function moveImageUntilShake (image: Image) {
     // Wait for movement to stop before continuing
     basic.pause(100)
 }
-function beep () {
-	
+function beep() {
+
 }
-function menuAnimateLeave () {
+function menuAnimateLeave() {
     IMAGE_RECT_L.showImage(0)
     basic.pause(5)
     IMAGE_RECT_S.showImage(0)
@@ -531,7 +547,7 @@ function menuAnimateLeave () {
     basic.clearScreen()
     disableLEDs()
 }
-function menuAnimateEnter () {
+function menuAnimateEnter() {
     disableLEDs()
     IMAGE_DOT.showImage(0)
     basic.pause(5)
@@ -696,7 +712,6 @@ IMAGE_MULTIPLY = images.createImage(`
     . # . # .
     . . . . .
     `)
-
 
 menuState = 1
 let firstTime = true

@@ -119,8 +119,7 @@ function menuLoop() {
 }
 
 function disableLEDs () {
-    strip.clear()
-    strip.show()
+    basic.turnRgbLedOff()
 }
 function showStringUntilButton(text: string, event_id: number) {
 
@@ -229,9 +228,9 @@ function oracleRun () {
             }
 
             IMAGE_DOT.showImage(0)
-            basic.pause(200)
+            basic.pause(100)
             basic.clearScreen()
-            basic.pause(50)
+            basic.pause(100)
         }
 
         if (leave) break
@@ -287,14 +286,19 @@ function rockPaperScissorsRun () {
         } else {
             IMAGE_SCISSORS.showImage(0)
         }
-        for (let w = 0; w < 3000; w += 100) {
+        
+        //
+        // --- WAIT UP TO 2 SECONDS OR UNTIL AB IS PRESSED ---
+        //
+        buttonABFlag = false  // start fresh
+        for (let t = 0; t < 2000; t += 100) {
             basic.pause(100)
-            if (input.buttonIsPressed(Button.A) && input.buttonIsPressed(Button.B)) {
+            if (buttonABFlag) {
+                buttonABFlag = false
                 leave = true
                 break
             }
         }
-
         basic.clearScreen()
     }
 }
@@ -367,12 +371,17 @@ function volumeMeterRun () {
     0
     ]
     while (!(leave)) {
-        if (input.buttonIsPressed(Button.A) && input.buttonIsPressed(Button.B)) {
-            while (input.buttonIsPressed(Button.A) || input.buttonIsPressed(Button.B)) {
-                basic.pause(10)
+        //
+        // --- WAIT UP TO 2 SECONDS OR UNTIL AB IS PRESSED ---
+        //
+        buttonABFlag = false  // start fresh
+        for (let t = 0; t < 2000; t += 100) {
+            basic.pause(100)
+            if (buttonABFlag) {
+                buttonABFlag = false
+                leave = true
+                break
             }
-            leave = true
-            break;
         }
 
         for (let n = 0; n <= 3; n++) {
@@ -436,16 +445,15 @@ function rainbow () {
     disableLEDs()
 }
 function LEDTrafficLight (color: number) {
-    strip.clear()
     if (color == 0) {
         // Green
-        strip.setPixelColor(0, neopixel.rgb(0, 100, 0))
+        basic.setLedColors(0x00ff00, 0x000000, 0x000000)
     } else if (color == 1) {
         // Yellow
-        strip.setPixelColor(1, neopixel.rgb(100, 100, 0))
+        basic.setLedColors(0x000000, 0xffff00, 0x000000)
     } else if (color == 2) {
         // Red
-        strip.setPixelColor(2, neopixel.rgb(100, 0, 0))
+        basic.setLedColors(0x000000, 0x000000, 0xff0000)
     }
     strip.show()
 }
@@ -455,20 +463,15 @@ function LEDcounter (number: number) {
     // Menu 2: Left + Middle LEDs
     // Menu 3: Middle + Right LEDs
     // Menu 4: Right LED only
-    strip.clear()
     if (number == 1) {
-        strip.setPixelColor(0, neopixel.rgb(100, 100, 100))
+        basic.setLedColors(0xffffff, 0x000000, 0x000000)
     } else if (number == 2) {
-        strip.setPixelColor(0, neopixel.rgb(100, 100, 100))
-        strip.setPixelColor(1, neopixel.rgb(100, 100, 100))
+        basic.setLedColors(0xffffff, 0xffffff, 0x000000)
     } else if (number == 3) {
-        strip.setPixelColor(1, neopixel.rgb(100, 100, 100))
-        strip.setPixelColor(2, neopixel.rgb(100, 100, 100))
+        basic.setLedColors(0x000000, 0xffffff, 0xffffff)
     } else if (number == 4) {
-        strip.setPixelColor(2, neopixel.rgb(100, 100, 100))
+        basic.setLedColors(0x000000, 0x000000, 0xffffff)
     }
-    // Call show() only once at the end for faster update
-    strip.show()
 }
 
 
@@ -693,6 +696,8 @@ IMAGE_MULTIPLY = images.createImage(`
     . # . # .
     . . . . .
     `)
+
+
 menuState = 1
 let firstTime = true
 displayBrightness = 255

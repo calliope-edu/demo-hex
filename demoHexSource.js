@@ -1,5 +1,7 @@
+/**
+ * 
+ */
 // ============= Variables =============
-
 let px = 0
 let localDirection = 0
 let localX = 0
@@ -87,37 +89,6 @@ IMAGE_MULTIPLY = images.createImage(`
     . # . # .
     . . . . .
     `)
-DIGIT_IMAGES = [
-    images.createImage(`
-    . . # . .
-    . # # . .
-    . . # . .
-    . . # . .
-    . # # # .
-    `),
-    images.createImage(`
-    . # # # .
-    . . . . #
-    . . # # .
-    . # . . .
-    . # # # #
-    `),
-    images.createImage(`
-    . # # # .
-    . . . . #
-    . . # # .
-    . . . . #
-    . # # # .
-    `),
-    images.createImage(`
-    . . # # .
-    . # . # .
-    # . . # .
-    # # # # #
-    . . . # .
-    `)
-]
-
 // ============= WELCOME DEMO =============
 function welcomeDemo () {
     basic.showString("Hi!", 100)
@@ -141,7 +112,6 @@ function welcomeDemo () {
     basic.pause(200)
     basic.clearScreen()
     basic.showString("OK!", 100)
-
     // Rainbow animation
     rainbow()
     basic.pause(1000)
@@ -192,7 +162,7 @@ function menuLoop () {
     buttonABFlag = false
     shakeFlag = false
     // Initial display
-    drawImageFast(DIGIT_IMAGES[menuState - 1], 0)
+    basic.showNumber(menuState,0)
     LEDcounter(menuState)
     while (true) {
         // --- A pressed → previous menu ---
@@ -202,7 +172,7 @@ function menuLoop () {
             if (menuState > 1) {
                 menuState += 0 - 1
                 LEDcounter(menuState)
-                drawImageFast(DIGIT_IMAGES[menuState - 1], 0)
+                basic.showNumber(menuState,0)
             }
         }
         // --- B pressed → next menu ---
@@ -212,7 +182,7 @@ function menuLoop () {
             if (menuState < 4) {
                 menuState += 1
                 LEDcounter(menuState)
-                drawImageFast(DIGIT_IMAGES[menuState - 1], 0)
+                basic.showNumber(menuState,0)
             }
         }
         if (shakeFlag) {
@@ -230,7 +200,7 @@ function menuLoop () {
                 volumeMeterRun()
             }
             menuAnimateLeave()
-            drawImageFast(DIGIT_IMAGES[menuState - 1], 0)
+            basic.showNumber(menuState,0)
             LEDcounter(menuState)
             shakeFlag = false
         }
@@ -605,7 +575,7 @@ function moveImageUntilShake (image: Image) {
         } else if (localX <= -3) {
             localDirection = 1
         }
-        drawImageFast(image, localX)
+        image.showImage(localX,0)
         basic.pause(60)
         // --- Check for AB exit (latched) ---
         if (buttonABFlag) {
@@ -626,24 +596,11 @@ function moveImageUntilShake (image: Image) {
     // Let movement settle
     basic.pause(100)
 }
-function drawImageFast (img: Image, offsetX: number) {
-    basic.clearScreen()
-    for (let y2 = 0; y2 <= 4; y2++) {
-        for (let x3 = 0; x3 <= 4; x3++) {
-            // Convert pixel to boolean on the fly
-            if (img.pixel(x3, y2)) {
-                px = x3 + offsetX
-                if (px >= 0 && px < 5) {
-                    led.plot(px, y2)
-                }
-            }
-        }
-    }
-}
+
 function menuAnimateLeave () {
-    drawImageFast(IMAGE_RECT_L, 0)
+    IMAGE_RECT_L.showImage(0,0)
     basic.pause(150)
-    drawImageFast(IMAGE_RECT_S, 0)
+    IMAGE_RECT_S.showImage(0,0)
     basic.pause(150)
     led.plot(2, 2)
     basic.pause(150)
@@ -654,20 +611,17 @@ function menuAnimateEnter () {
     basic.turnRgbLedOff()
     led.plot(2, 2)
     basic.pause(150)
-    drawImageFast(IMAGE_RECT_S, 0)
+    IMAGE_RECT_S.showImage(0,0)
     basic.pause(150)
-    drawImageFast(IMAGE_RECT_L, 0)
+    IMAGE_RECT_L.showImage(0,0)
     basic.pause(150)
     basic.clearScreen()
 }
-
 // ============= PROGRAM START =============
-
 if (control.ramSize() > 64000) {
     hardwareVersion = 3
 } else {
     hardwareVersion = 2
 }
-
 welcomeDemo()
 menuLoop()

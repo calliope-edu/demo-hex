@@ -90,7 +90,7 @@ IMAGE_MULTIPLY = images.createImage(`
     . . . . .
     `)
 // ============= WELCOME DEMO =============
-function welcomeDemo () {
+function welcomeDemo() {
     basic.showString("Hi!", 100)
     // Press A
     showStringUntilButton("A", 1)
@@ -116,7 +116,7 @@ function welcomeDemo () {
     rainbow()
     basic.pause(1000)
 }
-function hslToHex (h: number, s: number, l: number) {
+function hslToHex(h: number, s: number, l: number) {
     h = h % 360
     s = s / 100
     l = l / 100
@@ -124,7 +124,7 @@ function hslToHex (h: number, s: number, l: number) {
     x = c * (1 - Math.abs(h / 60 % 2 - 1))
     m = l - c / 2
     let r, g, b;
-if (h < 60) {
+    if (h < 60) {
         r = c
         g = x
         b = 0
@@ -155,14 +155,14 @@ if (h < 60) {
     return (r << 16) | (g << 8) | b
 }
 // ============= MENU SYSTEM =============
-function menuLoop () {
+function menuLoop() {
     // Reset flags so only NEW presses count
     buttonAFlag = false
     buttonBFlag = false
     buttonABFlag = false
     shakeFlag = false
     // Initial display
-    basic.showNumber(menuState,0)
+    basic.showNumber(menuState, 0)
     LEDcounter(menuState)
     while (true) {
         // --- A pressed → previous menu ---
@@ -172,8 +172,9 @@ function menuLoop () {
             if (menuState > 1) {
                 menuState += 0 - 1
                 LEDcounter(menuState)
-                basic.showNumber(menuState,0)
+                basic.showNumber(menuState, 0)
             }
+            shakeFlag = false
         }
         // --- B pressed → next menu ---
         if (buttonBFlag) {
@@ -182,8 +183,9 @@ function menuLoop () {
             if (menuState < 4) {
                 menuState += 1
                 LEDcounter(menuState)
-                basic.showNumber(menuState,0)
+                basic.showNumber(menuState, 0)
             }
+            shakeFlag = false
         }
         if (shakeFlag) {
             // consume event
@@ -200,7 +202,7 @@ function menuLoop () {
                 volumeMeterRun()
             }
             menuAnimateLeave()
-            basic.showNumber(menuState,0)
+            basic.showNumber(menuState, 0)
             LEDcounter(menuState)
             shakeFlag = false
         }
@@ -210,7 +212,7 @@ function menuLoop () {
 input.onButtonPressed(Button.A, function () {
     buttonAFlag = true
 })
-function showStringUntilButton (text: string, event_id: number) {
+function showStringUntilButton(text: string, event_id: number) {
     // Reset button flags so only NEW presses count
     buttonAFlag = false
     buttonBFlag = false
@@ -262,14 +264,14 @@ function showStringUntilButton (text: string, event_id: number) {
     buttonABFlag = false
 }
 // ============= PROGRAM 4: VOLUME METER =============
-function volumeMeterRun () {
+function volumeMeterRun() {
     leave = false
     gauges = [
-    0,
-    0,
-    0,
-    0,
-    0
+        0,
+        0,
+        0,
+        0,
+        0
     ]
     // start fresh
     buttonABFlag = false
@@ -313,9 +315,9 @@ function volumeMeterRun () {
     basic.clearScreen()
     basic.turnRgbLedOff()
 }
-function rainbow () {
+function rainbow() {
     let brightness;
-led.setBrightness(0)
+    led.setBrightness(0)
     IMAGE_SMILEY.showImage(0)
     for (let j = 0; j <= 299; j++) {
         if (hardwareVersion == 3) {
@@ -343,7 +345,7 @@ led.setBrightness(0)
     basic.turnRgbLedOff()
 }
 // ============= PROGRAM 2: ROCK PAPER SCISSORS =============
-function rockPaperScissorsRun () {
+function rockPaperScissorsRun() {
     leave = false
     // Show what's possible
     IMAGE_ROCK.showImage(0)
@@ -381,10 +383,10 @@ function rockPaperScissorsRun () {
                 break
             }
         }
-basic.clearScreen()
+        basic.clearScreen()
     }
 }
-function LEDTrafficLight (color: number) {
+function LEDTrafficLight(color: number) {
     if (color == 0) {
         // Green
         if (hardwareVersion == 3) {
@@ -408,7 +410,7 @@ function LEDTrafficLight (color: number) {
         }
     }
 }
-function LEDcounter (number: number) {
+function LEDcounter(number: number) {
     // V3: Light up RGB LEDs based on menu number
     // Menu 1: Left LED only
     // Menu 2: Left + Middle LEDs
@@ -430,7 +432,7 @@ input.onButtonPressed(Button.AB, function () {
     buttonABFlag = true
 })
 // ============= PROGRAM 3: MULTIPLICATION =============
-function multiplicationRun () {
+function multiplicationRun() {
     leave = false
     ready = false
     // Reset button flags so only NEW presses count
@@ -454,9 +456,10 @@ function multiplicationRun () {
             // consume event
             buttonAFlag = false
             factor1 = Math.floor(Math.random() * 10)
-            basic.showNumber(factor1)
+            basic.showNumber(factor1, 0)
             ready = false
             basic.pause(300)
+            shakeFlag = false
         }
         // --- Button B → second factor ---
         if (buttonBFlag) {
@@ -465,17 +468,18 @@ function multiplicationRun () {
             IMAGE_MULTIPLY.showImage(0)
             basic.pause(300)
             factor2 = Math.floor(Math.random() * 10)
-            basic.showNumber(factor2)
+            basic.showNumber(factor2, 0)
             ready = true
             basic.pause(300)
+            shakeFlag = false
         }
         // --- Shake → show result ---
         if (shakeFlag && ready) {
             // consume event
             shakeFlag = false
             result = factor1 * factor2
+            basic.showString('=')
             basic.showNumber(result)
-            basic.pause(1000)
             basic.showIcon(IconNames.ArrowWest)
             ready = false
         }
@@ -485,11 +489,11 @@ function multiplicationRun () {
 input.onButtonPressed(Button.B, function () {
     buttonBFlag = true
 })
-input.onGesture(Gesture.ThreeG, function () {
+input.onGesture(Gesture.SixG, function () {
     shakeFlag = true
 })
 // ============= PROGRAM 1: ORACLE =============
-function oracleRun () {
+function oracleRun() {
     leave = false
     pressed = false
     // Reset flags so only NEW presses count
@@ -558,10 +562,10 @@ function oracleRun () {
                 break
             }
         }
-basic.clearScreen()
+        basic.clearScreen()
     }
 }
-function moveImageUntilShake (image: Image) {
+function moveImageUntilShake(image: Image) {
     // Start fresh
     shakeFlag = false
     buttonABFlag = false
@@ -575,7 +579,7 @@ function moveImageUntilShake (image: Image) {
         } else if (localX <= -3) {
             localDirection = 1
         }
-        image.showImage(localX,0)
+        image.showImage(localX, 0)
         basic.pause(60)
         // --- Check for AB exit (latched) ---
         if (buttonABFlag) {
@@ -597,23 +601,23 @@ function moveImageUntilShake (image: Image) {
     basic.pause(100)
 }
 
-function menuAnimateLeave () {
-    IMAGE_RECT_L.showImage(0,0)
+function menuAnimateLeave() {
+    IMAGE_RECT_L.showImage(0, 0)
     basic.pause(150)
-    IMAGE_RECT_S.showImage(0,0)
+    IMAGE_RECT_S.showImage(0, 0)
     basic.pause(150)
     led.plot(2, 2)
     basic.pause(150)
     basic.clearScreen()
     basic.turnRgbLedOff()
 }
-function menuAnimateEnter () {
+function menuAnimateEnter() {
     basic.turnRgbLedOff()
     led.plot(2, 2)
     basic.pause(150)
-    IMAGE_RECT_S.showImage(0,0)
+    IMAGE_RECT_S.showImage(0, 0)
     basic.pause(150)
-    IMAGE_RECT_L.showImage(0,0)
+    IMAGE_RECT_L.showImage(0, 0)
     basic.pause(150)
     basic.clearScreen()
 }
